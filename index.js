@@ -1,13 +1,23 @@
+const color = require('colors-cli');
+const waterfall = require('async-waterfall');
 const readFileLineByLine = require('./lib/file.reader');
 const isURL = require('./lib/url.validator');
 const request = require('./lib/request');
-const color = require('colors-cli');
+const chunkArray = require('./lib/array.utils').chunkArray;
 
 init(process.argv);
 
 function init(args) {
   const startTime = Date.now();
-  const filePath = args.pop();
+  const lastArg = args.pop();
+  let filePath, chunkSize = 50;
+  if ( isNaN(lastArg) ) {
+    filePath = lastArg;
+  } else {
+    chunkSize = Number(lastArg);
+    filePath = args.pop();
+  }
+  
   const validUrls = [];
   const invalidUrls = [];
   readFileLineByLine(
@@ -26,7 +36,7 @@ function init(args) {
       validUrls.forEach(u => console.log(color.green(u)));
       console.log('\n\n\n');
       
-      requestLinks(validUrls, () => {
+      batch(validUrls, chunkSize, () => {
         console.log(color.green('END'));
         console.log(color.green(`total time: ${endTime(startTime)}`));
       });
@@ -34,11 +44,20 @@ function init(args) {
   )
 }
 
+function batch(urlArray, chunkSize, endCallback) {
+  let chunks;
+  let tasks;
+  chunks = chunkArray(urlArray, chunkSize);
+  tasks = chunks.map( (urls) => (callback) => requestLinks( urls, () => callback() ) );
+  waterfall(tasks, endCallback);
+}
+
 function requestLinks(validUrls, end) {
   let downloaded = 0;
   validUrls
   .forEach( u => requestLink(u, () => {
     downloaded += 1;
+    console.log(color.yellow(`download ${validUrls.length - downloaded} pages simultaneously`));
     if (downloaded === validUrls.length){
       end();
     }

@@ -6,6 +6,7 @@
     "start": "node ./index.js"
   },
   "dependencies": {
+    "async-waterfall": "^0.1.5",
     "colors-cli": "^1.0.17",
     "jquery": "3.2.1",
     "jsdom": "11.3.0",
