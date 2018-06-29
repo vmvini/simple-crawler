@@ -4,10 +4,28 @@ const isURL = require('./lib/url.validator');
 const batch = require('./request-pages');
 const utils = require('./lib/utils');
 
+/**
+ * Using chunk default size in case the user didnt provide the value in command line
+ * the chunk size is used to make this tool download at most n pages simultaneously.
+ * This can increase performance if you want to download thousands of pages, 
+ * You should provide a reasonable chunk size value in case your txt file has hundreds, or thousands of pages.
+ * For instance, for 1000 pages, I would put the chunk size as 100. 
+ * This way nodejs would download only 100 pages simultaneously. 
+ */
 const CHUNK_SIZE_DEFAULT = 50;
+
+//handleArgs is getting the arguments provided by the user on the command line interface. 
 const args = handleArgs(process.argv);
 init(args);
 
+/**
+ * this function checks if each line of the specified file is a valid URL;
+ * and then, after gathering all valid urls, the function will call batch function 
+ * passing the valid urls to perform a batch request to download the pages 
+ * simulteneously per chunks.
+ * After all the pages are downloaded, the callback (error, logs) => {} is called
+ * the logs object is an array containing details about each download so we can display here.
+ */
 function init({filePath, chunkSize}) {
   const startTime = Date.now();
   const validUrls = [];
