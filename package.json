@@ -1,0 +1,15 @@
+{
+  "name": "georanktest",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./index.js"
+  },
+  "dependencies": {
+    "colors-cli": "^1.0.17",
+    "jquery": "3.2.1",
+    "jsdom": "11.3.0",
+    "request": "2.83.0",
+    "validator": "^10.4.0"
+  }
+}
